@@ -12,6 +12,7 @@ const QRScanner = ({ onScan }: QRScannerProps) => {
   const [isScanning, setIsScanning] = useState(false);
   const [error, setError] = useState<string>("");
   const scannerRef = useRef<Html5Qrcode | null>(null);
+  const lastScanRef = useRef<{ text: string; time: number } | null>(null);
   const qrCodeRegionId = "qr-reader";
 
   const startScanner = async () => {
@@ -27,6 +28,17 @@ const QRScanner = ({ onScan }: QRScannerProps) => {
           qrbox: { width: 250, height: 250 },
         },
         (decodedText) => {
+          // Prevent duplicate scans within 2 seconds
+          const now = Date.now();
+          if (
+            lastScanRef.current &&
+            lastScanRef.current.text === decodedText &&
+            now - lastScanRef.current.time < 2000
+          ) {
+            return;
+          }
+          
+          lastScanRef.current = { text: decodedText, time: now };
           onScan(decodedText);
         },
         (errorMessage) => {
