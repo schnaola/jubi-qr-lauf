@@ -2,67 +2,56 @@ import { useState, useEffect, useCallback } from "react";
 import QRScanner from "@/components/QRScanner";
 import ResultsTable from "@/components/ResultsTable";
 import TimerDisplay from "@/components/TimerDisplay";
+import ParticipantManager from "@/components/ParticipantManager";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { RotateCcw } from "lucide-react";
 import orienteeringBg from "@/assets/orienteering-map-bg.jpg";
-
-interface Result {
-  checkpoint: string;
-  time: string;
-}
+import { Participant } from "@/types/participant";
 
 const CHECKPOINTS = ["Start", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Ziel"];
 
 const Index = () => {
-  const [results, setResults] = useState<Result[]>([]);
-  const [startTime, setStartTime] = useState<number | null>(null);
+  const [participants, setParticipants] = useState<Participant[]>([]);
+  const [activeParticipantId, setActiveParticipantId] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState<number>(0);
-  const [isRunning, setIsRunning] = useState(false);
-  const [nextCheckpointIndex, setNextCheckpointIndex] = useState(0);
+
+  const activeParticipant = participants.find((p) => p.id === activeParticipantId);
 
   // Load saved state from localStorage
   useEffect(() => {
-    const savedResults = localStorage.getItem("orienteeringResults");
-    const savedStartTime = localStorage.getItem("orienteeringStartTime");
-    const savedNextIndex = localStorage.getItem("orienteeringNextIndex");
+    const savedParticipants = localStorage.getItem("orienteeringParticipants");
+    const savedActiveId = localStorage.getItem("orienteeringActiveParticipant");
 
-    if (savedResults) setResults(JSON.parse(savedResults));
-    if (savedStartTime) {
-      const startTimeNum = parseInt(savedStartTime);
-      setStartTime(startTimeNum);
-      setIsRunning(true);
+    if (savedParticipants) {
+      setParticipants(JSON.parse(savedParticipants));
     }
-    if (savedNextIndex) setNextCheckpointIndex(parseInt(savedNextIndex));
+    if (savedActiveId) {
+      setActiveParticipantId(savedActiveId);
+    }
   }, []);
 
   // Save state to localStorage
   useEffect(() => {
-    localStorage.setItem("orienteeringResults", JSON.stringify(results));
-  }, [results]);
+    localStorage.setItem("orienteeringParticipants", JSON.stringify(participants));
+  }, [participants]);
 
   useEffect(() => {
-    if (startTime !== null) {
-      localStorage.setItem("orienteeringStartTime", startTime.toString());
-    } else {
-      localStorage.removeItem("orienteeringStartTime");
+    if (activeParticipantId) {
+      localStorage.setItem("orienteeringActiveParticipant", activeParticipantId);
     }
-  }, [startTime]);
-
-  useEffect(() => {
-    localStorage.setItem("orienteeringNextIndex", nextCheckpointIndex.toString());
-  }, [nextCheckpointIndex]);
+  }, [activeParticipantId]);
 
   // Timer effect
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    if (isRunning && startTime !== null) {
+    if (activeParticipant?.startTime !== null && activeParticipant?.startTime !== undefined) {
       interval = setInterval(() => {
-        setCurrentTime(Date.now() - startTime);
+        setCurrentTime(Date.now() - activeParticipant.startTime!);
       }, 10);
     }
     return () => clearInterval(interval);
-  }, [isRunning, startTime]);
+  }, [activeParticipant?.startTime]);
 
   const formatTime = useCallback((ms: number) => {
     const totalSeconds = Math.floor(ms / 1000);
@@ -74,9 +63,42 @@ const Index = () => {
       .padStart(2, "0")}.${milliseconds.toString().padStart(2, "0")}`;
   }, []);
 
+  const handleAddParticipant = (name: string) => {
+    const newParticipant: Participant = {
+      id: Date.now().toString(),
+      name,
+      results: [],
+      startTime: null,
+      nextCheckpointIndex: 0,
+    };
+    setParticipants((prev) => [...prev, newParticipant]);
+    setActiveParticipantId(newParticipant.id);
+    toast.success(`${name} hinzugefügt`);
+  };
+
+  const handleSelectParticipant = (id: string) => {
+    setActiveParticipantId(id);
+    const participant = participants.find((p) => p.id === id);
+    if (participant) {
+      toast.info(`${participant.name} ausgewählt`);
+    }
+  };
+
+  const updateActiveParticipant = (updates: Partial<Participant>) => {
+    if (!activeParticipantId) return;
+    setParticipants((prev) =>
+      prev.map((p) => (p.id === activeParticipantId ? { ...p, ...updates } : p))
+    );
+  };
+
   const handleScan = useCallback(
     (decodedText: string) => {
-      const expectedCheckpoint = CHECKPOINTS[nextCheckpointIndex];
+      if (!activeParticipant) {
+        toast.error("Bitte wähle zuerst einen Teilnehmer!");
+        return;
+      }
+
+      const expectedCheckpoint = CHECKPOINTS[activeParticipant.nextCheckpointIndex];
 
       if (decodedText !== expectedCheckpoint) {
         toast.error(`Falscher Posten! Erwartet: ${expectedCheckpoint}`, {
@@ -87,48 +109,58 @@ const Index = () => {
 
       if (decodedText === "Start") {
         const now = Date.now();
-        setStartTime(now);
-        setIsRunning(true);
-        setResults([{ checkpoint: "Start", time: "00:00.00" }]);
-        setNextCheckpointIndex(1);
+        updateActiveParticipant({
+          startTime: now,
+          results: [{ checkpoint: "Start", time: "00:00.00" }],
+          nextCheckpointIndex: 1,
+        });
         toast.success("Timer gestartet!");
       } else if (decodedText === "Ziel") {
-        if (startTime === null) {
+        if (activeParticipant.startTime === null) {
           toast.error("Timer wurde nicht gestartet!");
           return;
         }
-        const finalTime = Date.now() - startTime;
-        setIsRunning(false);
-        setResults((prev) => [...prev, { checkpoint: "Ziel", time: formatTime(finalTime) }]);
-        setNextCheckpointIndex(12);
+        const finalTime = Date.now() - activeParticipant.startTime;
+        updateActiveParticipant({
+          results: [...activeParticipant.results, { checkpoint: "Ziel", time: formatTime(finalTime) }],
+          nextCheckpointIndex: 12,
+        });
         toast.success("Ziel erreicht! Timer gestoppt.");
       } else {
-        if (startTime === null) {
+        if (activeParticipant.startTime === null) {
           toast.error("Timer wurde nicht gestartet!");
           return;
         }
-        const interimTime = Date.now() - startTime;
-        setResults((prev) => [
-          ...prev,
-          { checkpoint: decodedText, time: formatTime(interimTime) },
-        ]);
-        setNextCheckpointIndex((prev) => prev + 1);
+        const interimTime = Date.now() - activeParticipant.startTime;
+        updateActiveParticipant({
+          results: [
+            ...activeParticipant.results,
+            { checkpoint: decodedText, time: formatTime(interimTime) },
+          ],
+          nextCheckpointIndex: activeParticipant.nextCheckpointIndex + 1,
+        });
         toast.success(`Posten ${decodedText} erfasst!`);
       }
     },
-    [nextCheckpointIndex, startTime, formatTime]
+    [activeParticipant, activeParticipantId, formatTime]
   );
 
   const handleReset = () => {
-    setResults([]);
-    setStartTime(null);
-    setCurrentTime(0);
-    setIsRunning(false);
-    setNextCheckpointIndex(0);
-    localStorage.removeItem("orienteeringResults");
-    localStorage.removeItem("orienteeringStartTime");
-    localStorage.removeItem("orienteeringNextIndex");
-    toast.info("Zurückgesetzt");
+    if (!activeParticipant) return;
+    updateActiveParticipant({
+      results: [],
+      startTime: null,
+      nextCheckpointIndex: 0,
+    });
+    toast.info(`${activeParticipant.name} zurückgesetzt`);
+  };
+
+  const handleResetAll = () => {
+    setParticipants([]);
+    setActiveParticipantId(null);
+    localStorage.removeItem("orienteeringParticipants");
+    localStorage.removeItem("orienteeringActiveParticipant");
+    toast.info("Alles zurückgesetzt");
   };
 
   return (
@@ -148,35 +180,60 @@ const Index = () => {
           </h2>
         </header>
 
+        <div className="mb-6">
+          <ParticipantManager
+            participants={participants}
+            activeParticipantId={activeParticipantId}
+            onAddParticipant={handleAddParticipant}
+            onSelectParticipant={handleSelectParticipant}
+          />
+        </div>
+
         <div className="grid gap-6 md:grid-cols-2 mb-6">
           <TimerDisplay 
-            time={isRunning ? formatTime(currentTime) : "00:00.00"} 
-            isRunning={isRunning}
+            time={activeParticipant?.startTime ? formatTime(currentTime) : "00:00.00"} 
+            isRunning={!!activeParticipant?.startTime}
+            participantName={activeParticipant?.name}
           />
           
           <div className="flex flex-col gap-4">
             <div className="bg-card/95 backdrop-blur rounded-lg p-4 border border-border">
               <h3 className="font-semibold mb-2 text-foreground">Nächster Posten:</h3>
               <p className="text-2xl font-bold text-accent">
-                {nextCheckpointIndex < CHECKPOINTS.length 
-                  ? CHECKPOINTS[nextCheckpointIndex]
-                  : "Fertig!"}
+                {activeParticipant && activeParticipant.nextCheckpointIndex < CHECKPOINTS.length 
+                  ? CHECKPOINTS[activeParticipant.nextCheckpointIndex]
+                  : activeParticipant ? "Fertig!" : "-"}
               </p>
             </div>
-            <Button 
-              onClick={handleReset} 
-              variant="outline"
-              className="w-full"
-            >
-              <RotateCcw className="mr-2 h-4 w-4" />
-              Zurücksetzen
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                onClick={handleReset} 
+                variant="outline"
+                className="flex-1"
+                disabled={!activeParticipant}
+              >
+                <RotateCcw className="mr-2 h-4 w-4" />
+                Teilnehmer zurücksetzen
+              </Button>
+              <Button 
+                onClick={handleResetAll} 
+                variant="destructive"
+                className="flex-1"
+              >
+                <RotateCcw className="mr-2 h-4 w-4" />
+                Alles zurücksetzen
+              </Button>
+            </div>
           </div>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
           <QRScanner onScan={handleScan} />
-          <ResultsTable results={results} />
+          <ResultsTable 
+            results={activeParticipant?.results || []} 
+            participantName={activeParticipant?.name}
+            allParticipants={participants}
+          />
         </div>
       </div>
     </div>
