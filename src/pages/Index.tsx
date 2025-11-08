@@ -91,10 +91,29 @@ const Index = () => {
     );
   };
 
+  const playSound = (frequency: number, duration: number = 200) => {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.value = frequency;
+    oscillator.type = 'sine';
+    
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration / 1000);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + duration / 1000);
+  };
+
   const handleScan = useCallback(
     (decodedText: string) => {
       if (!activeParticipant) {
         toast.error("Bitte wähle zuerst einen Teilnehmer!");
+        playSound(200, 300);
         return;
       }
 
@@ -104,8 +123,11 @@ const Index = () => {
         toast.error(`Falscher Posten! Erwartet: ${expectedCheckpoint}`, {
           description: `Gescannt: ${decodedText}`,
         });
+        playSound(200, 300);
         return;
       }
+
+      playSound(800, 150);
 
       if (decodedText === "Start") {
         const now = Date.now();
@@ -118,17 +140,20 @@ const Index = () => {
       } else if (decodedText === "Ziel") {
         if (activeParticipant.startTime === null) {
           toast.error("Timer wurde nicht gestartet!");
+          playSound(200, 300);
           return;
         }
         const finalTime = Date.now() - activeParticipant.startTime;
         updateActiveParticipant({
           results: [...activeParticipant.results, { checkpoint: "Ziel", time: formatTime(finalTime) }],
           nextCheckpointIndex: 12,
+          startTime: null,
         });
         toast.success("Ziel erreicht! Timer gestoppt.");
       } else {
         if (activeParticipant.startTime === null) {
           toast.error("Timer wurde nicht gestartet!");
+          playSound(200, 300);
           return;
         }
         const interimTime = Date.now() - activeParticipant.startTime;
