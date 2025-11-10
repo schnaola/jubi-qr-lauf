@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
-import QRScanner from "@/components/QRScanner";
+import { useState, useEffect, useCallback, useRef } from "react";
+import QRScanner, { QRScannerRef } from "@/components/QRScanner";
 import ResultsTable from "@/components/ResultsTable";
 import TimerDisplay from "@/components/TimerDisplay";
 import ParticipantManager from "@/components/ParticipantManager";
@@ -14,6 +14,7 @@ const CHECKPOINTS = ["Start", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
 const Index = () => {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [activeParticipantId, setActiveParticipantId] = useState<string | null>(null);
+  const qrScannerRef = useRef<QRScannerRef>(null);
   const [currentTime, setCurrentTime] = useState<number>(0);
 
   const activeParticipant = participants.find((p) => p.id === activeParticipantId);
@@ -128,6 +129,7 @@ const Index = () => {
       }
 
       playSound(800, 150);
+      qrScannerRef.current?.stopScanner();
 
       if (decodedText === "Start") {
         const now = Date.now();
@@ -253,7 +255,7 @@ const Index = () => {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
-          <QRScanner onScan={handleScan} />
+          <QRScanner ref={qrScannerRef} onScan={handleScan} />
           <ResultsTable 
             results={activeParticipant?.results || []} 
             participantName={activeParticipant?.name}

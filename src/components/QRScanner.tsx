@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from "react";
 import { Html5Qrcode } from "html5-qrcode";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -8,7 +8,11 @@ interface QRScannerProps {
   onScan: (decodedText: string) => void;
 }
 
-const QRScanner = ({ onScan }: QRScannerProps) => {
+export interface QRScannerRef {
+  stopScanner: () => Promise<void>;
+}
+
+const QRScanner = forwardRef<QRScannerRef, QRScannerProps>(({ onScan }, ref) => {
   const [isScanning, setIsScanning] = useState(false);
   const [error, setError] = useState<string>("");
   const scannerRef = useRef<Html5Qrcode | null>(null);
@@ -51,6 +55,10 @@ const QRScanner = ({ onScan }: QRScannerProps) => {
     }
   };
 
+  useImperativeHandle(ref, () => ({
+    stopScanner,
+  }));
+
   useEffect(() => {
     return () => {
       if (scannerRef.current) {
@@ -89,6 +97,8 @@ const QRScanner = ({ onScan }: QRScannerProps) => {
       </div>
     </Card>
   );
-};
+});
+
+QRScanner.displayName = "QRScanner";
 
 export default QRScanner;
