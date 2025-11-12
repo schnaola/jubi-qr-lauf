@@ -4,18 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Camera, CameraOff } from "lucide-react";
 
-interface QRScannerProps {
-  onScan: (decodedText: string) => void;
-}
-
-export interface QRScannerRef {
-  stopScanner: () => Promise<void>;
-}
-
-const QRScanner = forwardRef<QRScannerRef, QRScannerProps>(({ onScan }, ref) => {
+const QRScanner = forwardRef(({ onScan }, ref) => {
   const [isScanning, setIsScanning] = useState(false);
-  const [error, setError] = useState<string>("");
-  const scannerRef = useRef<Html5Qrcode | null>(null);
+  const [error, setError] = useState("");
+  const scannerRef = useRef(null);
   const qrCodeRegionId = "qr-reader";
 
   const startScanner = async () => {

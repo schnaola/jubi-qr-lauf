@@ -4,21 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UserPlus, Users } from "lucide-react";
-import { Participant } from "@/types/participant";
-
-interface ParticipantManagerProps {
-  participants: Participant[];
-  activeParticipantId: string | null;
-  onAddParticipant: (name: string) => void;
-  onSelectParticipant: (id: string) => void;
-}
 
 const ParticipantManager = ({
   participants,
   activeParticipantId,
   onAddParticipant,
   onSelectParticipant,
-}: ParticipantManagerProps) => {
+}) => {
   const [newName, setNewName] = useState("");
 
   const handleAdd = () => {

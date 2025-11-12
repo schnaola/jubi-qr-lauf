@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import QRScanner, { QRScannerRef } from "@/components/QRScanner";
+import QRScanner from "@/components/QRScanner";
 import ResultsTable from "@/components/ResultsTable";
 import TimerDisplay from "@/components/TimerDisplay";
 import ParticipantManager from "@/components/ParticipantManager";
@@ -7,16 +7,15 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { RotateCcw } from "lucide-react";
 import orienteeringBg from "@/assets/orienteering-map-bg.jpg";
-import { Participant } from "@/types/participant";
 
 const CHECKPOINTS = ["Start", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Ziel"];
 const ORDERED_CHECKPOINTS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
 
 const Index = () => {
-  const [participants, setParticipants] = useState<Participant[]>([]);
-  const [activeParticipantId, setActiveParticipantId] = useState<string | null>(null);
-  const qrScannerRef = useRef<QRScannerRef>(null);
-  const [currentTime, setCurrentTime] = useState<number>(0);
+  const [participants, setParticipants] = useState([]);
+  const [activeParticipantId, setActiveParticipantId] = useState(null);
+  const qrScannerRef = useRef(null);
+  const [currentTime, setCurrentTime] = useState(0);
 
   const activeParticipant = participants.find((p) => p.id === activeParticipantId);
 
@@ -46,16 +45,16 @@ const Index = () => {
 
   // Timer effect
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval;
     if (activeParticipant?.startTime !== null && activeParticipant?.startTime !== undefined) {
       interval = setInterval(() => {
-        setCurrentTime(Date.now() - activeParticipant.startTime!);
+        setCurrentTime(Date.now() - activeParticipant.startTime);
       }, 10);
     }
     return () => clearInterval(interval);
   }, [activeParticipant?.startTime]);
 
-  const formatTime = useCallback((ms: number) => {
+  const formatTime = useCallback((ms) => {
     const totalSeconds = Math.floor(ms / 1000);
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
@@ -65,8 +64,8 @@ const Index = () => {
       .padStart(2, "0")}.${milliseconds.toString().padStart(2, "0")}`;
   }, []);
 
-  const handleAddParticipant = (name: string) => {
-    const newParticipant: Participant = {
+  const handleAddParticipant = (name) => {
+    const newParticipant = {
       id: Date.now().toString(),
       name,
       results: [],
@@ -78,7 +77,7 @@ const Index = () => {
     toast.success(`${name} hinzugefügt`);
   };
 
-  const handleSelectParticipant = (id: string) => {
+  const handleSelectParticipant = (id) => {
     setActiveParticipantId(id);
     const participant = participants.find((p) => p.id === id);
     if (participant) {
@@ -86,15 +85,15 @@ const Index = () => {
     }
   };
 
-  const updateActiveParticipant = (updates: Partial<Participant>) => {
+  const updateActiveParticipant = (updates) => {
     if (!activeParticipantId) return;
     setParticipants((prev) =>
       prev.map((p) => (p.id === activeParticipantId ? { ...p, ...updates } : p))
     );
   };
 
-  const playSound = (frequency: number, duration: number = 200) => {
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+  const playSound = (frequency, duration = 200) => {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
     
@@ -112,7 +111,7 @@ const Index = () => {
   };
 
   const handleScan = useCallback(
-    (decodedText: string) => {
+    (decodedText) => {
       if (!activeParticipant) {
         toast.error("Bitte wähle zuerst einen Teilnehmer!");
         playSound(200, 300);
@@ -179,7 +178,7 @@ const Index = () => {
         });
         toast.success("Timer gestartet!");
       } else if (decodedText === "Ziel") {
-        const finalTime = Date.now() - activeParticipant.startTime!;
+        const finalTime = Date.now() - activeParticipant.startTime;
         updateActiveParticipant({
           results: [...activeParticipant.results, { checkpoint: "Ziel", time: formatTime(finalTime) }],
           scannedCheckpoints: [...activeParticipant.scannedCheckpoints, "Ziel"],
@@ -187,7 +186,7 @@ const Index = () => {
         });
         toast.success("Ziel erreicht! Timer gestoppt.");
       } else {
-        const interimTime = Date.now() - activeParticipant.startTime!;
+        const interimTime = Date.now() - activeParticipant.startTime;
         updateActiveParticipant({
           results: [
             ...activeParticipant.results,

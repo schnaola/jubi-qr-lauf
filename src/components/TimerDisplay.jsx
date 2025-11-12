@@ -1,13 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Timer } from "lucide-react";
 
-interface TimerDisplayProps {
-  time: string;
-  isRunning: boolean;
-  participantName?: string;
-}
-
-const TimerDisplay = ({ time, isRunning, participantName }: TimerDisplayProps) => {
+const TimerDisplay = ({ time, isRunning, participantName }) => {
   return (
     <Card className="p-8 bg-card/95 backdrop-blur text-center">
       <div className="flex items-center justify-center gap-3 mb-2">

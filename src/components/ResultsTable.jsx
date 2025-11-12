@@ -8,16 +8,9 @@ import {
 } from "@/components/ui/table";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Participant, Result } from "@/types/participant";
 
-interface ResultsTableProps {
-  results: Result[];
-  participantName?: string;
-  allParticipants?: Participant[];
-}
-
-const ResultsTable = ({ results, participantName, allParticipants }: ResultsTableProps) => {
-  const renderTable = (participantResults: Result[], showParticipant: boolean = false) => (
+const ResultsTable = ({ results, participantName, allParticipants }) => {
+  const renderTable = (participantResults, showParticipant = false) => (
     <div className="rounded-md border border-border overflow-hidden">
       <Table>
         <TableHeader>
