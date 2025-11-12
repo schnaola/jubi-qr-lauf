@@ -10,6 +10,7 @@ import orienteeringBg from "@/assets/orienteering-map-bg.jpg";
 import { Participant } from "@/types/participant";
 
 const CHECKPOINTS = ["Start", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Ziel"];
+const ORDERED_CHECKPOINTS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
 
 const Index = () => {
   const [participants, setParticipants] = useState<Participant[]>([]);
@@ -70,7 +71,7 @@ const Index = () => {
       name,
       results: [],
       startTime: null,
-      nextCheckpointIndex: 0,
+      scannedCheckpoints: [],
     };
     setParticipants((prev) => [...prev, newParticipant]);
     setActiveParticipantId(newParticipant.id);
@@ -118,14 +119,52 @@ const Index = () => {
         return;
       }
 
-      const expectedCheckpoint = CHECKPOINTS[activeParticipant.nextCheckpointIndex];
+      const hasStarted = activeParticipant.scannedCheckpoints.includes("Start");
+      const hasScannedAllCheckpoints = ORDERED_CHECKPOINTS.every(cp => 
+        activeParticipant.scannedCheckpoints.includes(cp)
+      );
+      const alreadyScanned = activeParticipant.scannedCheckpoints.includes(decodedText);
 
-      if (decodedText !== expectedCheckpoint) {
-        toast.error(`Falscher Posten! Erwartet: ${expectedCheckpoint}`, {
-          description: `Gescannt: ${decodedText}`,
-        });
-        playSound(200, 300);
-        return;
+      // Validation logic
+      if (decodedText === "Start") {
+        if (hasStarted) {
+          toast.error("Start wurde bereits gescannt!");
+          playSound(200, 300);
+          return;
+        }
+      } else if (decodedText === "Ziel") {
+        if (!hasStarted) {
+          toast.error("Bitte zuerst Start scannen!");
+          playSound(200, 300);
+          return;
+        }
+        if (!hasScannedAllCheckpoints) {
+          const remaining = ORDERED_CHECKPOINTS.filter(cp => 
+            !activeParticipant.scannedCheckpoints.includes(cp)
+          );
+          toast.error(`Noch nicht alle Posten gescannt!`, {
+            description: `Fehlende Posten: ${remaining.join(", ")}`,
+          });
+          playSound(200, 300);
+          return;
+        }
+      } else {
+        // Checkpoints 1-10
+        if (!hasStarted) {
+          toast.error("Bitte zuerst Start scannen!");
+          playSound(200, 300);
+          return;
+        }
+        if (!ORDERED_CHECKPOINTS.includes(decodedText)) {
+          toast.error(`Ungültiger Posten: ${decodedText}`);
+          playSound(200, 300);
+          return;
+        }
+        if (alreadyScanned) {
+          toast.error(`Posten ${decodedText} wurde bereits gescannt!`);
+          playSound(200, 300);
+          return;
+        }
       }
 
       playSound(800, 150);
@@ -136,35 +175,25 @@ const Index = () => {
         updateActiveParticipant({
           startTime: now,
           results: [{ checkpoint: "Start", time: "00:00.00" }],
-          nextCheckpointIndex: 1,
+          scannedCheckpoints: ["Start"],
         });
         toast.success("Timer gestartet!");
       } else if (decodedText === "Ziel") {
-        if (activeParticipant.startTime === null) {
-          toast.error("Timer wurde nicht gestartet!");
-          playSound(200, 300);
-          return;
-        }
-        const finalTime = Date.now() - activeParticipant.startTime;
+        const finalTime = Date.now() - activeParticipant.startTime!;
         updateActiveParticipant({
           results: [...activeParticipant.results, { checkpoint: "Ziel", time: formatTime(finalTime) }],
-          nextCheckpointIndex: 12,
+          scannedCheckpoints: [...activeParticipant.scannedCheckpoints, "Ziel"],
           startTime: null,
         });
         toast.success("Ziel erreicht! Timer gestoppt.");
       } else {
-        if (activeParticipant.startTime === null) {
-          toast.error("Timer wurde nicht gestartet!");
-          playSound(200, 300);
-          return;
-        }
-        const interimTime = Date.now() - activeParticipant.startTime;
+        const interimTime = Date.now() - activeParticipant.startTime!;
         updateActiveParticipant({
           results: [
             ...activeParticipant.results,
             { checkpoint: decodedText, time: formatTime(interimTime) },
           ],
-          nextCheckpointIndex: activeParticipant.nextCheckpointIndex + 1,
+          scannedCheckpoints: [...activeParticipant.scannedCheckpoints, decodedText],
         });
         toast.success(`Posten ${decodedText} erfasst!`);
       }
@@ -177,7 +206,7 @@ const Index = () => {
     updateActiveParticipant({
       results: [],
       startTime: null,
-      nextCheckpointIndex: 0,
+      scannedCheckpoints: [],
     });
     toast.info(`${activeParticipant.name} zurückgesetzt`);
   };
@@ -225,12 +254,24 @@ const Index = () => {
           
           <div className="flex flex-col gap-4">
             <div className="bg-card/95 backdrop-blur rounded-lg p-4 border border-border">
-              <h3 className="font-semibold mb-2 text-foreground">Nächster Posten:</h3>
+              <h3 className="font-semibold mb-2 text-foreground">Status:</h3>
               <p className="text-2xl font-bold text-accent">
-                {activeParticipant && activeParticipant.nextCheckpointIndex < CHECKPOINTS.length 
-                  ? CHECKPOINTS[activeParticipant.nextCheckpointIndex]
-                  : activeParticipant ? "Fertig!" : "-"}
+                {activeParticipant ? (
+                  !activeParticipant.scannedCheckpoints.includes("Start") 
+                    ? "Start scannen"
+                    : activeParticipant.scannedCheckpoints.includes("Ziel")
+                    ? "Fertig!"
+                    : `${activeParticipant.scannedCheckpoints.length - 1}/10 Posten`
+                ) : "-"}
               </p>
+              {activeParticipant && activeParticipant.scannedCheckpoints.includes("Start") && 
+               !activeParticipant.scannedCheckpoints.includes("Ziel") && (
+                <p className="text-sm text-muted-foreground mt-2">
+                  Fehlende Posten: {ORDERED_CHECKPOINTS.filter(cp => 
+                    !activeParticipant.scannedCheckpoints.includes(cp)
+                  ).join(", ") || "Keine - Ziel scannen!"}
+                </p>
+              )}
             </div>
             <div className="flex gap-2">
               <Button 

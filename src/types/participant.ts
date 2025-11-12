@@ -8,5 +8,5 @@ export interface Participant {
   name: string;
   results: Result[];
   startTime: number | null;
-  nextCheckpointIndex: number;
+  scannedCheckpoints: string[];
 }
