@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from "react";
+import React, { useEffect, useRef, useState, forwardRef, useImperativeHandle } from "react";
 import { Html5Qrcode } from "html5-qrcode";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -59,35 +59,29 @@ const QRScanner = forwardRef(({ onScan }, ref) => {
     };
   }, []);
 
-  return (
-    <Card className="p-6 bg-card/95 backdrop-blur">
-      <div className="space-y-4">
-        <div
-          id={qrCodeRegionId}
-          className="w-full min-h-[300px] rounded-lg overflow-hidden bg-muted/30"
-        />
-        {error && (
-          <p className="text-sm text-destructive text-center">{error}</p>
-        )}
-        <Button
-          onClick={isScanning ? stopScanner : startScanner}
-          className="w-full"
-          variant={isScanning ? "destructive" : "default"}
-        >
-          {isScanning ? (
-            <>
-              <CameraOff className="mr-2 h-4 w-4" />
-              Scanner stoppen
-            </>
-          ) : (
-            <>
-              <Camera className="mr-2 h-4 w-4" />
-              Scanner starten
-            </>
-          )}
-        </Button>
-      </div>
-    </Card>
+  return React.createElement(Card, { className: "p-6 bg-card/95 backdrop-blur" },
+    React.createElement("div", { className: "space-y-4" },
+      React.createElement("div", {
+        id: qrCodeRegionId,
+        className: "w-full min-h-[300px] rounded-lg overflow-hidden bg-muted/30"
+      }),
+      error && React.createElement("p", { className: "text-sm text-destructive text-center" }, error),
+      React.createElement(Button, {
+        onClick: isScanning ? stopScanner : startScanner,
+        className: "w-full",
+        variant: isScanning ? "destructive" : "default"
+      },
+        isScanning 
+          ? [
+              React.createElement(CameraOff, { key: "icon", className: "mr-2 h-4 w-4" }),
+              "Scanner stoppen"
+            ]
+          : [
+              React.createElement(Camera, { key: "icon", className: "mr-2 h-4 w-4" }),
+              "Scanner starten"
+            ]
+      )
+    )
   );
 });
 

@@ -21,7 +21,10 @@ const badgeVariants = cva(
 );
 
 function Badge({ className, variant, ...props }) {
-  return <div className={cn(badgeVariants({ variant }), className)} {...props} />;
+  return React.createElement("div", {
+    className: cn(badgeVariants({ variant }), className),
+    ...props
+  });
 }
 
 export { Badge, badgeVariants };

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import QRScanner from "@/components/QRScanner";
 import ResultsTable from "@/components/ResultsTable";
 import TimerDisplay from "@/components/TimerDisplay";
@@ -219,92 +219,84 @@ const Index = () => {
     toast.info("Alles zurückgesetzt");
   };
 
-  return (
-    <div 
-      className="min-h-screen bg-cover bg-center bg-fixed relative"
-      style={{ backgroundImage: `url(${orienteeringBg})` }}
-    >
-      <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" />
-      
-      <div className="relative z-10 container mx-auto px-4 py-8 max-w-5xl">
-        <header className="text-center mb-8">
-          <h1 className="text-3xl md:text-5xl font-bold text-foreground mb-2">
-            Christians 50-Jahre-Jubiläum
-          </h1>
-          <h2 className="text-xl md:text-2xl text-primary font-semibold">
-            GKZ Büro OL
-          </h2>
-        </header>
-
-        <div className="mb-6">
-          <ParticipantManager
-            participants={participants}
-            activeParticipantId={activeParticipantId}
-            onAddParticipant={handleAddParticipant}
-            onSelectParticipant={handleSelectParticipant}
-          />
-        </div>
-
-        <div className="grid gap-6 md:grid-cols-2 mb-6">
-          <TimerDisplay 
-            time={activeParticipant?.startTime ? formatTime(currentTime) : "00:00.00"} 
-            isRunning={!!activeParticipant?.startTime}
-            participantName={activeParticipant?.name}
-          />
-          
-          <div className="flex flex-col gap-4">
-            <div className="bg-card/95 backdrop-blur rounded-lg p-4 border border-border">
-              <h3 className="font-semibold mb-2 text-foreground">Status:</h3>
-              <p className="text-2xl font-bold text-accent">
-                {activeParticipant ? (
-                  !activeParticipant.scannedCheckpoints.includes("Start") 
-                    ? "Start scannen"
-                    : activeParticipant.scannedCheckpoints.includes("Ziel")
-                    ? "Fertig!"
-                    : `${new Set(activeParticipant.scannedCheckpoints.filter(cp => ORDERED_CHECKPOINTS.includes(cp))).size}/10 Posten`
-                ) : "-"}
-              </p>
-              {activeParticipant && activeParticipant.scannedCheckpoints.includes("Start") && 
-               !activeParticipant.scannedCheckpoints.includes("Ziel") && (
-                <p className="text-sm text-muted-foreground mt-2">
-                  Fehlende Posten: {ORDERED_CHECKPOINTS.filter(cp => 
-                    !activeParticipant.scannedCheckpoints.includes(cp)
-                  ).join(", ") || "Keine - Ziel scannen!"}
-                </p>
-              )}
-            </div>
-            <div className="flex gap-2">
-              <Button 
-                onClick={handleReset} 
-                variant="outline"
-                className="flex-1"
-                disabled={!activeParticipant}
-              >
-                <RotateCcw className="mr-2 h-4 w-4" />
-                Teilnehmer zurücksetzen
-              </Button>
-              <Button 
-                onClick={handleResetAll} 
-                variant="destructive"
-                className="flex-1"
-              >
-                <RotateCcw className="mr-2 h-4 w-4" />
-                Alles zurücksetzen
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid gap-6 md:grid-cols-2">
-          <QRScanner ref={qrScannerRef} onScan={handleScan} />
-          <ResultsTable 
-            results={activeParticipant?.results || []} 
-            participantName={activeParticipant?.name}
-            allParticipants={participants}
-          />
-        </div>
-      </div>
-    </div>
+  return React.createElement("div", {
+    className: "min-h-screen bg-cover bg-center bg-fixed relative",
+    style: { backgroundImage: `url(${orienteeringBg})` }
+  },
+    React.createElement("div", { className: "absolute inset-0 bg-background/80 backdrop-blur-sm" }),
+    React.createElement("div", { className: "relative z-10 container mx-auto px-4 py-8 max-w-5xl" },
+      React.createElement("header", { className: "text-center mb-8" },
+        React.createElement("h1", { className: "text-3xl md:text-5xl font-bold text-foreground mb-2" },
+          "Christians 50-Jahre-Jubiläum"
+        ),
+        React.createElement("h2", { className: "text-xl md:text-2xl text-primary font-semibold" },
+          "GKZ Büro OL"
+        )
+      ),
+      React.createElement("div", { className: "mb-6" },
+        React.createElement(ParticipantManager, {
+          participants,
+          activeParticipantId,
+          onAddParticipant: handleAddParticipant,
+          onSelectParticipant: handleSelectParticipant
+        })
+      ),
+      React.createElement("div", { className: "grid gap-6 md:grid-cols-2 mb-6" },
+        React.createElement(TimerDisplay, {
+          time: activeParticipant?.startTime ? formatTime(currentTime) : "00:00.00",
+          isRunning: !!activeParticipant?.startTime,
+          participantName: activeParticipant?.name
+        }),
+        React.createElement("div", { className: "flex flex-col gap-4" },
+          React.createElement("div", { className: "bg-card/95 backdrop-blur rounded-lg p-4 border border-border" },
+            React.createElement("h3", { className: "font-semibold mb-2 text-foreground" }, "Status:"),
+            React.createElement("p", { className: "text-2xl font-bold text-accent" },
+              activeParticipant ? (
+                !activeParticipant.scannedCheckpoints.includes("Start") 
+                  ? "Start scannen"
+                  : activeParticipant.scannedCheckpoints.includes("Ziel")
+                  ? "Fertig!"
+                  : `${new Set(activeParticipant.scannedCheckpoints.filter(cp => ORDERED_CHECKPOINTS.includes(cp))).size}/10 Posten`
+              ) : "-"
+            ),
+            activeParticipant && activeParticipant.scannedCheckpoints.includes("Start") && 
+              !activeParticipant.scannedCheckpoints.includes("Ziel") &&
+              React.createElement("p", { className: "text-sm text-muted-foreground mt-2" },
+                "Fehlende Posten: ", ORDERED_CHECKPOINTS.filter(cp => 
+                  !activeParticipant.scannedCheckpoints.includes(cp)
+                ).join(", ") || "Keine - Ziel scannen!"
+              )
+          ),
+          React.createElement("div", { className: "flex gap-2" },
+            React.createElement(Button, {
+              onClick: handleReset,
+              variant: "outline",
+              className: "flex-1",
+              disabled: !activeParticipant
+            },
+              React.createElement(RotateCcw, { className: "mr-2 h-4 w-4" }),
+              "Teilnehmer zurücksetzen"
+            ),
+            React.createElement(Button, {
+              onClick: handleResetAll,
+              variant: "destructive",
+              className: "flex-1"
+            },
+              React.createElement(RotateCcw, { className: "mr-2 h-4 w-4" }),
+              "Alles zurücksetzen"
+            )
+          )
+        )
+      ),
+      React.createElement("div", { className: "grid gap-6 md:grid-cols-2" },
+        React.createElement(QRScanner, { ref: qrScannerRef, onScan: handleScan }),
+        React.createElement(ResultsTable, {
+          results: activeParticipant?.results || [],
+          participantName: activeParticipant?.name,
+          allParticipants: participants
+        })
+      )
+    )
   );
 };
 
