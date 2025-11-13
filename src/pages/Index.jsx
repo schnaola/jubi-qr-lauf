@@ -122,7 +122,8 @@ const Index = () => {
       const hasScannedAllCheckpoints = ORDERED_CHECKPOINTS.every(cp => 
         activeParticipant.scannedCheckpoints.includes(cp)
       );
-      const alreadyScanned = activeParticipant.scannedCheckpoints.includes(decodedText);
+      const lastScannedCheckpoint = activeParticipant.scannedCheckpoints[activeParticipant.scannedCheckpoints.length - 1];
+      const isSameAsLast = decodedText === lastScannedCheckpoint;
 
       // Validation logic
       if (decodedText === "Start") {
@@ -159,8 +160,8 @@ const Index = () => {
           playSound(200, 300);
           return;
         }
-        if (alreadyScanned) {
-          toast.error(`Posten ${decodedText} wurde bereits gescannt!`);
+        if (isSameAsLast) {
+          toast.error(`Posten ${decodedText} wurde gerade erst gescannt!`);
           playSound(200, 300);
           return;
         }
@@ -260,7 +261,7 @@ const Index = () => {
                     ? "Start scannen"
                     : activeParticipant.scannedCheckpoints.includes("Ziel")
                     ? "Fertig!"
-                    : `${activeParticipant.scannedCheckpoints.length - 1}/10 Posten`
+                    : `${new Set(activeParticipant.scannedCheckpoints.filter(cp => ORDERED_CHECKPOINTS.includes(cp))).size}/10 Posten`
                 ) : "-"}
               </p>
               {activeParticipant && activeParticipant.scannedCheckpoints.includes("Start") && 
