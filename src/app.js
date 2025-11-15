@@ -284,172 +284,338 @@ function handleResetAll() {
 function render(container) {
   const active = getActiveParticipant();
   
-  container.innerHTML = `
-    <div class="min-h-screen bg-cover bg-center bg-fixed relative" style="background-image: url(/src/assets/orienteering-map-bg.jpg)">>
-      <div class="absolute inset-0 bg-background/80 backdrop-blur-sm"></div>
-      <div class="relative z-10 container mx-auto px-4 py-8 max-w-5xl">
-        <header class="text-center mb-8">
-          <h1 class="text-3xl md:text-5xl font-bold text-foreground mb-2">Christians 50-Jahre-Jubiläum</h1>
-          <h2 class="text-xl md:text-2xl text-primary font-semibold">GKZ Büro OL</h2>
-        </header>
-
-        <div class="mb-6">
-          <div class="card p-4 bg-card/95 backdrop-blur">
-            <div class="flex items-center gap-2 mb-3">
-              <svg class="h-5 w-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-              </svg>
-              <h3 class="font-semibold text-foreground">Teilnehmer</h3>
-            </div>
-            <div class="space-y-3">
-              <div class="flex gap-2">
-                <input 
-                  type="text" 
-                  id="participant-name" 
-                  placeholder="Name eingeben..." 
-                  class="input flex-1"
-                />
-                <button id="add-participant-btn" class="btn btn-icon">
-                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
-                  </svg>
-                </button>
-              </div>
-              ${state.participants.length > 0 ? `
-                <select id="participant-select" class="input w-full">
-                  <option value="">Teilnehmer wählen...</option>
-                  ${state.participants.map(p => `
-                    <option value="${p.id}" ${p.id === state.activeParticipantId ? 'selected' : ''}>
-                      ${p.name}
-                    </option>
-                  `).join('')}
-                </select>
-              ` : ''}
-            </div>
-          </div>
-        </div>
-
-        <div class="grid gap-6 md:grid-cols-2 mb-6">
-          <div class="card p-8 bg-card/95 backdrop-blur text-center">
-            <div class="flex items-center justify-center gap-3 mb-2">
-              <svg class="h-8 w-8 ${active?.startTime ? 'text-accent animate-pulse' : 'text-muted-foreground'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-              <h3 class="text-lg font-semibold text-foreground">
-                Timer ${active ? `- ${active.name}` : ''}
-              </h3>
-            </div>
-            <div id="timer-display" class="text-5xl font-bold font-mono text-foreground mt-4">
-              ${active?.startTime ? formatTime(state.currentTime) : '00:00.00'}
-            </div>
-            <p class="text-sm text-muted-foreground mt-2">
-              ${active?.startTime ? 'Läuft...' : 'Bereit'}
-            </p>
-          </div>
-
-          <div class="flex flex-col gap-4">
-            <div class="bg-card/95 backdrop-blur rounded-lg p-4 border border-border">
-              <h3 class="font-semibold mb-2 text-foreground">Status:</h3>
-              <p class="text-2xl font-bold text-accent">
-                ${active ? (
-                  !active.scannedCheckpoints.includes('Start') 
-                    ? 'Start scannen'
-                    : active.scannedCheckpoints.includes('Ziel')
-                    ? 'Fertig!'
-                    : `${new Set(active.scannedCheckpoints.filter(cp => ORDERED_CHECKPOINTS.includes(cp))).size}/10 Posten`
-                ) : '-'}
-              </p>
-              ${active && active.scannedCheckpoints.includes('Start') && !active.scannedCheckpoints.includes('Ziel') ? `
-                <p class="text-sm text-muted-foreground mt-2">
-                  Fehlende Posten: ${ORDERED_CHECKPOINTS.filter(cp => !active.scannedCheckpoints.includes(cp)).join(', ') || 'Keine - Ziel scannen!'}
-                </p>
-              ` : ''}
-            </div>
-            <div class="flex gap-2">
-              <button id="reset-btn" class="btn btn-outline flex-1" ${!active ? 'disabled' : ''}>
-                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                </svg>
-                Teilnehmer zurücksetzen
-              </button>
-              <button id="reset-all-btn" class="btn btn-destructive flex-1">
-                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                </svg>
-                Alles zurücksetzen
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div class="grid gap-6 md:grid-cols-2">
-          <div class="card p-6 bg-card/95 backdrop-blur">
-            <div class="space-y-4">
-              <div id="qr-reader" class="w-full min-h-[300px] rounded-lg overflow-hidden bg-muted/30"></div>
-              <button id="scanner-toggle-btn" class="btn btn-primary w-full">
-                Scanner starten
-              </button>
-            </div>
-          </div>
-
-          <div class="card overflow-hidden bg-card/95 backdrop-blur">
-            <div class="p-6">
-              <h2 class="text-2xl font-bold mb-4 text-foreground">
-                Resultate ${active ? `- ${active.name}` : ''}
-              </h2>
-              <div class="rounded-md border border-border overflow-hidden">
-                <table class="w-full">
-                  <thead class="bg-primary/10">
-                    <tr>
-                      <th class="h-12 px-4 text-left font-bold text-foreground">Postennummer</th>
-                      <th class="h-12 px-4 text-right font-bold text-foreground">Zeit</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    ${active && active.results.length > 0 ? active.results.map(result => `
-                      <tr class="border-b hover:bg-muted/50">
-                        <td class="p-4 font-medium">${result.checkpoint}</td>
-                        <td class="p-4 text-right font-mono">${result.time}</td>
-                      </tr>
-                    `).join('') : `
-                      <tr>
-                        <td colspan="2" class="p-8 text-center text-muted-foreground">
-                          Noch keine Posten gescannt
-                        </td>
-                      </tr>
-                    `}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+  // Clear container
+  container.innerHTML = '';
+  
+  // Main wrapper
+  const mainWrapper = document.createElement('div');
+  mainWrapper.className = 'min-h-screen bg-cover bg-center bg-fixed relative';
+  mainWrapper.style.backgroundImage = 'url(/src/assets/orienteering-map-bg.jpg)';
+  
+  // Backdrop overlay
+  const backdrop = document.createElement('div');
+  backdrop.className = 'absolute inset-0 bg-background/80 backdrop-blur-sm';
+  mainWrapper.appendChild(backdrop);
+  
+  // Content container
+  const contentContainer = document.createElement('div');
+  contentContainer.className = 'relative z-10 container mx-auto px-4 py-8 max-w-5xl';
+  
+  // Header
+  const header = document.createElement('header');
+  header.className = 'text-center mb-8';
+  
+  const h1 = document.createElement('h1');
+  h1.className = 'text-3xl md:text-5xl font-bold text-foreground mb-2';
+  h1.textContent = 'Christians 50-Jahre-Jubiläum';
+  header.appendChild(h1);
+  
+  const h2 = document.createElement('h2');
+  h2.className = 'text-xl md:text-2xl text-primary font-semibold';
+  h2.textContent = 'GKZ Büro OL';
+  header.appendChild(h2);
+  
+  contentContainer.appendChild(header);
+  
+  // Participant section
+  const participantSection = document.createElement('div');
+  participantSection.className = 'mb-6';
+  
+  const participantCard = document.createElement('div');
+  participantCard.className = 'card p-4 bg-card/95 backdrop-blur';
+  
+  const participantHeader = document.createElement('div');
+  participantHeader.className = 'flex items-center gap-2 mb-3';
+  participantHeader.innerHTML = `
+    <svg class="h-5 w-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+    </svg>
   `;
-
+  
+  const h3 = document.createElement('h3');
+  h3.className = 'font-semibold text-foreground';
+  h3.textContent = 'Teilnehmer';
+  participantHeader.appendChild(h3);
+  participantCard.appendChild(participantHeader);
+  
+  const participantInputs = document.createElement('div');
+  participantInputs.className = 'space-y-3';
+  
+  const inputRow = document.createElement('div');
+  inputRow.className = 'flex gap-2';
+  
+  const nameInput = document.createElement('input');
+  nameInput.type = 'text';
+  nameInput.id = 'participant-name';
+  nameInput.placeholder = 'Name eingeben...';
+  nameInput.className = 'input flex-1';
+  inputRow.appendChild(nameInput);
+  
+  const addBtn = document.createElement('button');
+  addBtn.id = 'add-participant-btn';
+  addBtn.className = 'btn btn-icon';
+  addBtn.innerHTML = `
+    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+    </svg>
+  `;
+  inputRow.appendChild(addBtn);
+  participantInputs.appendChild(inputRow);
+  
+  if (state.participants.length > 0) {
+    const select = document.createElement('select');
+    select.id = 'participant-select';
+    select.className = 'input w-full';
+    
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = 'Teilnehmer wählen...';
+    select.appendChild(defaultOption);
+    
+    state.participants.forEach(p => {
+      const option = document.createElement('option');
+      option.value = p.id;
+      option.textContent = p.name;
+      if (p.id === state.activeParticipantId) {
+        option.selected = true;
+      }
+      select.appendChild(option);
+    });
+    
+    participantInputs.appendChild(select);
+  }
+  
+  participantCard.appendChild(participantInputs);
+  participantSection.appendChild(participantCard);
+  contentContainer.appendChild(participantSection);
+  
+  // Timer and Status Grid
+  const timerStatusGrid = document.createElement('div');
+  timerStatusGrid.className = 'grid gap-6 md:grid-cols-2 mb-6';
+  
+  // Timer Card
+  const timerCard = document.createElement('div');
+  timerCard.className = 'card p-8 bg-card/95 backdrop-blur text-center';
+  
+  const timerHeaderDiv = document.createElement('div');
+  timerHeaderDiv.className = 'flex items-center justify-center gap-3 mb-2';
+  
+  const clockIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  clockIcon.setAttribute('class', active?.startTime ? 'h-8 w-8 text-accent animate-pulse' : 'h-8 w-8 text-muted-foreground');
+  clockIcon.setAttribute('fill', 'none');
+  clockIcon.setAttribute('stroke', 'currentColor');
+  clockIcon.setAttribute('viewBox', '0 0 24 24');
+  clockIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>';
+  timerHeaderDiv.appendChild(clockIcon);
+  
+  const timerH3 = document.createElement('h3');
+  timerH3.className = 'text-lg font-semibold text-foreground';
+  timerH3.textContent = 'Timer' + (active ? ` - ${active.name}` : '');
+  timerHeaderDiv.appendChild(timerH3);
+  timerCard.appendChild(timerHeaderDiv);
+  
+  const timerDisplay = document.createElement('div');
+  timerDisplay.id = 'timer-display';
+  timerDisplay.className = 'text-5xl font-bold font-mono text-foreground mt-4';
+  timerDisplay.textContent = active?.startTime ? formatTime(state.currentTime) : '00:00.00';
+  timerCard.appendChild(timerDisplay);
+  
+  const timerStatus = document.createElement('p');
+  timerStatus.className = 'text-sm text-muted-foreground mt-2';
+  timerStatus.textContent = active?.startTime ? 'Läuft...' : 'Bereit';
+  timerCard.appendChild(timerStatus);
+  
+  timerStatusGrid.appendChild(timerCard);
+  
+  // Status and Reset Column
+  const statusColumn = document.createElement('div');
+  statusColumn.className = 'flex flex-col gap-4';
+  
+  const statusCard = document.createElement('div');
+  statusCard.className = 'bg-card/95 backdrop-blur rounded-lg p-4 border border-border';
+  
+  const statusH3 = document.createElement('h3');
+  statusH3.className = 'font-semibold mb-2 text-foreground';
+  statusH3.textContent = 'Status:';
+  statusCard.appendChild(statusH3);
+  
+  const statusText = document.createElement('p');
+  statusText.className = 'text-2xl font-bold text-accent';
+  if (active) {
+    if (!active.scannedCheckpoints.includes('Start')) {
+      statusText.textContent = 'Start scannen';
+    } else if (active.scannedCheckpoints.includes('Ziel')) {
+      statusText.textContent = 'Fertig!';
+    } else {
+      const scannedCount = new Set(active.scannedCheckpoints.filter(cp => ORDERED_CHECKPOINTS.includes(cp))).size;
+      statusText.textContent = `${scannedCount}/10 Posten`;
+    }
+  } else {
+    statusText.textContent = '-';
+  }
+  statusCard.appendChild(statusText);
+  
+  if (active && active.scannedCheckpoints.includes('Start') && !active.scannedCheckpoints.includes('Ziel')) {
+    const missingText = document.createElement('p');
+    missingText.className = 'text-sm text-muted-foreground mt-2';
+    const missingCheckpoints = ORDERED_CHECKPOINTS.filter(cp => !active.scannedCheckpoints.includes(cp));
+    missingText.textContent = `Fehlende Posten: ${missingCheckpoints.length > 0 ? missingCheckpoints.join(', ') : 'Keine - Ziel scannen!'}`;
+    statusCard.appendChild(missingText);
+  }
+  
+  statusColumn.appendChild(statusCard);
+  
+  const buttonRow = document.createElement('div');
+  buttonRow.className = 'flex gap-2';
+  
+  const resetBtn = document.createElement('button');
+  resetBtn.id = 'reset-btn';
+  resetBtn.className = 'btn btn-outline flex-1';
+  if (!active) resetBtn.disabled = true;
+  resetBtn.innerHTML = `
+    <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+    </svg>
+    Teilnehmer zurücksetzen
+  `;
+  buttonRow.appendChild(resetBtn);
+  
+  const resetAllBtn = document.createElement('button');
+  resetAllBtn.id = 'reset-all-btn';
+  resetAllBtn.className = 'btn btn-destructive flex-1';
+  resetAllBtn.innerHTML = `
+    <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+    </svg>
+    Alles zurücksetzen
+  `;
+  buttonRow.appendChild(resetAllBtn);
+  
+  statusColumn.appendChild(buttonRow);
+  timerStatusGrid.appendChild(statusColumn);
+  contentContainer.appendChild(timerStatusGrid);
+  
+  // Scanner and Results Grid
+  const scannerResultsGrid = document.createElement('div');
+  scannerResultsGrid.className = 'grid gap-6 md:grid-cols-2';
+  
+  // Scanner Card
+  const scannerCard = document.createElement('div');
+  scannerCard.className = 'card p-6 bg-card/95 backdrop-blur';
+  
+  const scannerSpace = document.createElement('div');
+  scannerSpace.className = 'space-y-4';
+  
+  const qrReader = document.createElement('div');
+  qrReader.id = 'qr-reader';
+  qrReader.className = 'w-full min-h-[300px] rounded-lg overflow-hidden bg-muted/30';
+  scannerSpace.appendChild(qrReader);
+  
+  const scannerToggleBtn = document.createElement('button');
+  scannerToggleBtn.id = 'scanner-toggle-btn';
+  scannerToggleBtn.className = 'btn btn-primary w-full';
+  scannerToggleBtn.textContent = 'Scanner starten';
+  scannerSpace.appendChild(scannerToggleBtn);
+  
+  scannerCard.appendChild(scannerSpace);
+  scannerResultsGrid.appendChild(scannerCard);
+  
+  // Results Card
+  const resultsCard = document.createElement('div');
+  resultsCard.className = 'card overflow-hidden bg-card/95 backdrop-blur';
+  
+  const resultsDiv = document.createElement('div');
+  resultsDiv.className = 'p-6';
+  
+  const resultsH2 = document.createElement('h2');
+  resultsH2.className = 'text-2xl font-bold mb-4 text-foreground';
+  resultsH2.textContent = 'Resultate' + (active ? ` - ${active.name}` : '');
+  resultsDiv.appendChild(resultsH2);
+  
+  const tableContainer = document.createElement('div');
+  tableContainer.className = 'rounded-md border border-border overflow-hidden';
+  
+  const table = document.createElement('table');
+  table.className = 'w-full';
+  
+  const thead = document.createElement('thead');
+  thead.className = 'bg-primary/10';
+  const headerRow = document.createElement('tr');
+  
+  const th1 = document.createElement('th');
+  th1.className = 'h-12 px-4 text-left font-bold text-foreground';
+  th1.textContent = 'Postennummer';
+  headerRow.appendChild(th1);
+  
+  const th2 = document.createElement('th');
+  th2.className = 'h-12 px-4 text-right font-bold text-foreground';
+  th2.textContent = 'Zeit';
+  headerRow.appendChild(th2);
+  
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+  
+  const tbody = document.createElement('tbody');
+  
+  if (active && active.results.length > 0) {
+    active.results.forEach(result => {
+      const tr = document.createElement('tr');
+      tr.className = 'border-b hover:bg-muted/50';
+      
+      const td1 = document.createElement('td');
+      td1.className = 'p-4 font-medium';
+      td1.textContent = result.checkpoint;
+      tr.appendChild(td1);
+      
+      const td2 = document.createElement('td');
+      td2.className = 'p-4 text-right font-mono';
+      td2.textContent = result.time;
+      tr.appendChild(td2);
+      
+      tbody.appendChild(tr);
+    });
+  } else {
+    const tr = document.createElement('tr');
+    const td = document.createElement('td');
+    td.colSpan = 2;
+    td.className = 'p-8 text-center text-muted-foreground';
+    td.textContent = 'Noch keine Posten gescannt';
+    tr.appendChild(td);
+    tbody.appendChild(tr);
+  }
+  
+  table.appendChild(tbody);
+  tableContainer.appendChild(table);
+  resultsDiv.appendChild(tableContainer);
+  resultsCard.appendChild(resultsDiv);
+  scannerResultsGrid.appendChild(resultsCard);
+  
+  contentContainer.appendChild(scannerResultsGrid);
+  mainWrapper.appendChild(contentContainer);
+  container.appendChild(mainWrapper);
+  
   // Attach event listeners
-  const addBtn = document.getElementById('add-participant-btn');
-  const nameInput = document.getElementById('participant-name');
+  const addBtnEl = document.getElementById('add-participant-btn');
+  const nameInputEl = document.getElementById('participant-name');
   const selectEl = document.getElementById('participant-select');
-  const scannerBtn = document.getElementById('scanner-toggle-btn');
-  const resetBtn = document.getElementById('reset-btn');
-  const resetAllBtn = document.getElementById('reset-all-btn');
+  const scannerBtnEl = document.getElementById('scanner-toggle-btn');
+  const resetBtnEl = document.getElementById('reset-btn');
+  const resetAllBtnEl = document.getElementById('reset-all-btn');
 
-  if (addBtn && nameInput) {
-    addBtn.onclick = () => {
-      const name = nameInput.value.trim();
+  if (addBtnEl && nameInputEl) {
+    addBtnEl.onclick = () => {
+      const name = nameInputEl.value.trim();
       if (name) {
         handleAddParticipant(name);
-        nameInput.value = '';
+        nameInputEl.value = '';
       }
     };
-    nameInput.onkeydown = (e) => {
+    nameInputEl.onkeydown = (e) => {
       if (e.key === 'Enter') {
-        const name = nameInput.value.trim();
+        const name = nameInputEl.value.trim();
         if (name) {
           handleAddParticipant(name);
-          nameInput.value = '';
+          nameInputEl.value = '';
         }
       }
     };
@@ -463,8 +629,8 @@ function render(container) {
     };
   }
 
-  if (scannerBtn) {
-    scannerBtn.onclick = () => {
+  if (scannerBtnEl) {
+    scannerBtnEl.onclick = () => {
       if (state.isScanning) {
         stopScanner();
       } else {
@@ -473,11 +639,11 @@ function render(container) {
     };
   }
 
-  if (resetBtn) {
-    resetBtn.onclick = handleReset;
+  if (resetBtnEl) {
+    resetBtnEl.onclick = handleReset;
   }
 
-  if (resetAllBtn) {
-    resetAllBtn.onclick = handleResetAll;
+  if (resetAllBtnEl) {
+    resetAllBtnEl.onclick = handleResetAll;
   }
 }
