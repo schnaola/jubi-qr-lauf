@@ -1,6 +1,3 @@
-import { Html5Qrcode } from 'html5-qrcode';
-import orienteeringBg from './assets/orienteering-map-bg.jpg';
-
 const CHECKPOINTS = ["Start", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Ziel"];
 const ORDERED_CHECKPOINTS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
 
@@ -12,7 +9,7 @@ let state = {
   scannerInstance: null,
 };
 
-export function createApp(container) {
+window.createApp = function(container) {
   loadStateFromLocalStorage();
   render(container);
   startTimerLoop();
@@ -288,7 +285,7 @@ function render(container) {
   const active = getActiveParticipant();
   
   container.innerHTML = `
-    <div class="min-h-screen bg-cover bg-center bg-fixed relative" style="background-image: url(${orienteeringBg})">
+    <div class="min-h-screen bg-cover bg-center bg-fixed relative" style="background-image: url(/src/assets/orienteering-map-bg.jpg)">>
       <div class="absolute inset-0 bg-background/80 backdrop-blur-sm"></div>
       <div class="relative z-10 container mx-auto px-4 py-8 max-w-5xl">
         <header class="text-center mb-8">
