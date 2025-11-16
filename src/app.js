@@ -387,11 +387,9 @@ function render(container) {
   
   participantCard.appendChild(participantInputs);
   participantSection.appendChild(participantCard);
-  contentContainer.appendChild(participantSection);
-  
-  // Timer and Status Grid
-  const timerStatusGrid = document.createElement('div');
-  timerStatusGrid.className = 'grid gap-6 md:grid-cols-2 mb-6';
+  // Timer Card (standalone)
+  const timerSection = document.createElement('div');
+  timerSection.className = 'mb-6';
   
   // Timer Card
   const timerCard = document.createElement('div');
@@ -425,11 +423,11 @@ function render(container) {
   timerStatus.textContent = active?.startTime ? 'Läuft...' : 'Bereit';
   timerCard.appendChild(timerStatus);
   
-  timerStatusGrid.appendChild(timerCard);
+  timerSection.appendChild(timerCard);
   
-  // Status and Reset Column
-  const statusColumn = document.createElement('div');
-  statusColumn.className = 'flex flex-col gap-4';
+  // Status Section (standalone)
+  const statusSection = document.createElement('div');
+  statusSection.className = 'mb-6';
   
   const statusCard = document.createElement('div');
   statusCard.className = 'bg-card/95 backdrop-blur rounded-lg p-4 border border-border';
@@ -460,10 +458,8 @@ function render(container) {
     missingText.className = 'text-sm text-muted-foreground mt-2';
     const missingCheckpoints = ORDERED_CHECKPOINTS.filter(cp => !active.scannedCheckpoints.includes(cp));
     missingText.textContent = `Fehlende Posten: ${missingCheckpoints.length > 0 ? missingCheckpoints.join(', ') : 'Keine - Ziel scannen!'}`;
-    statusCard.appendChild(missingText);
+  statusCard.appendChild(missingText);
   }
-  
-  statusColumn.appendChild(statusCard);
   
   const buttonRow = document.createElement('div');
   buttonRow.className = 'flex gap-2';
@@ -491,12 +487,12 @@ function render(container) {
   `;
   buttonRow.appendChild(resetAllBtn);
   
-  statusColumn.appendChild(buttonRow);
-  timerStatusGrid.appendChild(statusColumn);
+  statusCard.appendChild(buttonRow);
+  statusSection.appendChild(statusCard);
   
-  // Scanner and Results Grid
-  const scannerResultsGrid = document.createElement('div');
-  scannerResultsGrid.className = 'grid gap-6 md:grid-cols-2';
+  // Scanner Section (standalone)
+  const scannerSection = document.createElement('div');
+  scannerSection.className = 'mb-6';
   
   // Scanner Card
   const scannerCard = document.createElement('div');
@@ -517,9 +513,12 @@ function render(container) {
   scannerSpace.appendChild(scannerToggleBtn);
   
   scannerCard.appendChild(scannerSpace);
-  scannerResultsGrid.appendChild(scannerCard);
+  scannerSection.appendChild(scannerCard);
   
-  // Results Card
+  // Results Section (standalone)
+  const resultsSection = document.createElement('div');
+  resultsSection.className = 'mb-6';
+  
   const resultsCard = document.createElement('div');
   resultsCard.className = 'card overflow-hidden bg-card/95 backdrop-blur';
   
@@ -587,10 +586,15 @@ function render(container) {
   tableContainer.appendChild(table);
   resultsDiv.appendChild(tableContainer);
   resultsCard.appendChild(resultsDiv);
-  scannerResultsGrid.appendChild(resultsCard);
+  resultsSection.appendChild(resultsCard);
   
-  contentContainer.appendChild(scannerResultsGrid);
-  contentContainer.appendChild(timerStatusGrid);
+  // Append sections in requested order
+  contentContainer.appendChild(participantSection);
+  contentContainer.appendChild(scannerSection);
+  contentContainer.appendChild(statusSection);
+  contentContainer.appendChild(timerSection);
+  contentContainer.appendChild(resultsSection);
+  
   mainWrapper.appendChild(contentContainer);
   container.appendChild(mainWrapper);
   
