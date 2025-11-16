@@ -1,125 +1,482 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@layer base {
-  :root {
-    --background: 42 45% 96%;
-    --foreground: 95 40% 15%;
-    --card: 0 0% 100%;
-    --card-foreground: 95 40% 15%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 95 40% 15%;
-    --primary: 95 48% 22%;
-    --primary-foreground: 42 45% 96%;
-    --secondary: 32 85% 55%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 42 30% 88%;
-    --muted-foreground: 95 20% 45%;
-    --accent: 32 85% 55%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 42 25% 82%;
-    --input: 42 25% 82%;
-    --ring: 95 48% 22%;
-    --radius: 0.75rem;
-  }
-
-  .dark {
-    --background: 95 30% 12%;
-    --foreground: 42 45% 96%;
-    --card: 95 28% 16%;
-    --card-foreground: 42 45% 96%;
-    --popover: 95 28% 16%;
-    --popover-foreground: 42 45% 96%;
-    --primary: 32 85% 55%;
-    --primary-foreground: 95 30% 12%;
-    --secondary: 95 35% 22%;
-    --secondary-foreground: 42 45% 96%;
-    --muted: 95 25% 20%;
-    --muted-foreground: 42 30% 70%;
-    --accent: 32 85% 55%;
-    --accent-foreground: 95 30% 12%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 42 45% 96%;
-    --border: 95 20% 25%;
-    --input: 95 20% 25%;
-    --ring: 32 85% 55%;
-  }
+/* Reset and base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: hsl(42, 45%, 96%);
+  color: hsl(95, 40%, 15%);
+  line-height: 1.6;
+}
+
+/* Layout utilities */
+.min-h-screen {
+  min-height: 100vh;
+}
+
+.bg-cover {
+  background-size: cover;
+}
+
+.bg-center {
+  background-position: center;
+}
+
+.bg-fixed {
+  background-attachment: fixed;
+}
+
+.relative {
+  position: relative;
+}
+
+.absolute {
+  position: absolute;
+}
+
+.inset-0 {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.gap-6 {
+  gap: 1.5rem;
+}
+
+.gap-4 {
+  gap: 1rem;
+}
+
+.gap-3 {
+  gap: 0.75rem;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+
+/* Spacing */
+.p-8 {
+  padding: 2rem;
+}
+
+.p-6 {
+  padding: 1.5rem;
+}
+
+.p-4 {
+  padding: 1rem;
+}
+
+.px-4 {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.py-2 {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.mt-2 {
+  margin-top: 0.5rem;
+}
+
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
+/* Sizing */
+.w-full {
+  width: 100%;
+}
+
+.max-w-md {
+  max-width: 28rem;
+}
+
+.max-w-4xl {
+  max-width: 56rem;
+}
+
+.h-10 {
+  height: 2.5rem;
+}
+
+.h-\[50vh\] {
+  height: 50vh;
+}
+
+/* Colors */
+.bg-background\/95 {
+  background-color: hsla(42, 45%, 96%, 0.95);
+}
+
+.backdrop-blur-md {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.text-foreground {
+  color: hsl(95, 40%, 15%);
+}
+
+.text-primary {
+  color: hsl(95, 48%, 22%);
+}
+
+.text-accent {
+  color: hsl(32, 85%, 55%);
+}
+
+.text-muted-foreground {
+  color: hsl(95, 20%, 45%);
+}
+
+.text-destructive {
+  color: hsl(0, 84.2%, 60.2%);
+}
+
+.bg-primary {
+  background-color: hsl(95, 48%, 22%);
+}
+
+.bg-accent {
+  background-color: hsl(32, 85%, 55%);
+}
+
+.bg-destructive {
+  background-color: hsl(0, 84.2%, 60.2%);
+}
+
+.bg-muted {
+  background-color: hsl(42, 30%, 88%);
+}
+
+.border-border {
+  border-color: hsl(42, 25%, 82%);
+}
+
+/* Typography */
+.text-4xl {
+  font-size: 2.25rem;
+  line-height: 2.5rem;
+}
+
+.text-3xl {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+}
+
+.text-2xl {
+  font-size: 1.5rem;
+  line-height: 2rem;
+}
+
+.text-xl {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+}
+
+.text-lg {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* Borders */
+.rounded-lg {
+  border-radius: 0.75rem;
+}
+
+.rounded-md {
+  border-radius: 0.375rem;
+}
+
+.border {
+  border-width: 1px;
+  border-style: solid;
+}
+
+/* Shadows */
+.shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Card component */
+.card {
+  border-radius: 0.75rem;
+  border: 1px solid hsl(42, 25%, 82%);
+  background-color: hsl(0, 0%, 100%);
+  color: hsl(95, 40%, 15%);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Button components */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  height: 2.5rem;
+  padding: 0.5rem 1rem;
+  transition: all 0.2s;
+  cursor: pointer;
+  border: none;
+}
+
+.btn:focus-visible {
+  outline: 2px solid hsl(95, 48%, 22%);
+  outline-offset: 2px;
+}
+
+.btn:disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.btn-primary {
+  background-color: hsl(95, 48%, 22%);
+  color: hsl(42, 45%, 96%);
+}
+
+.btn-primary:hover {
+  background-color: hsl(95, 48%, 18%);
+}
+
+.btn-destructive {
+  background-color: hsl(0, 84.2%, 60.2%);
+  color: hsl(0, 0%, 100%);
+}
+
+.btn-destructive:hover {
+  background-color: hsl(0, 84.2%, 55%);
+}
+
+.btn-outline {
+  border: 1px solid hsl(42, 25%, 82%);
+  background-color: hsl(42, 45%, 96%);
+}
+
+.btn-outline:hover {
+  background-color: hsl(32, 85%, 55%);
+  color: hsl(0, 0%, 100%);
+}
+
+.btn-icon {
+  height: 2.5rem;
+  width: 2.5rem;
+  padding: 0;
+}
+
+/* Input component */
+.input {
+  display: flex;
+  height: 2.5rem;
+  width: 100%;
+  border-radius: 0.375rem;
+  border: 1px solid hsl(42, 25%, 82%);
+  background-color: hsl(42, 45%, 96%);
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+}
+
+.input::placeholder {
+  color: hsl(95, 20%, 45%);
+}
+
+.input:focus-visible {
+  outline: 2px solid hsl(95, 48%, 22%);
+  outline-offset: 2px;
+}
+
+.input:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Toast component */
+.toast {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  background-color: hsl(42, 45%, 96%);
+  border: 1px solid hsl(42, 25%, 82%);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  min-width: 300px;
+  opacity: 0;
+  transform: translateX(100%);
+  transition: all 0.3s;
+  z-index: 9999;
+}
+
+.toast-show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.toast-success .toast-content::before {
+  content: '✓';
+  display: inline-block;
+  margin-right: 0.5rem;
+  color: hsl(32, 85%, 55%);
+  font-weight: bold;
+}
+
+.toast-error .toast-content::before {
+  content: '✕';
+  display: inline-block;
+  margin-right: 0.5rem;
+  color: hsl(0, 84.2%, 60.2%);
+  font-weight: bold;
+}
+
+.toast-info .toast-content::before {
+  content: 'ℹ';
+  display: inline-block;
+  margin-right: 0.5rem;
+  color: hsl(95, 48%, 22%);
+  font-weight: bold;
+}
+
+.toast-message {
+  color: hsl(95, 40%, 15%);
+  font-weight: 500;
+}
+
+.toast-description {
+  font-size: 0.875rem;
+  color: hsl(95, 20%, 45%);
+  margin-top: 0.25rem;
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
   body {
-    @apply bg-background text-foreground;
-    font-family: 'Inter', sans-serif;
+    background-color: hsl(95, 30%, 12%);
+    color: hsl(42, 45%, 96%);
+  }
+  
+  .card {
+    background-color: hsl(95, 28%, 16%);
+    color: hsl(42, 45%, 96%);
+    border-color: hsl(95, 20%, 25%);
+  }
+  
+  .bg-background\/95 {
+    background-color: hsla(95, 30%, 12%, 0.95);
+  }
+  
+  .text-foreground {
+    color: hsl(42, 45%, 96%);
+  }
+  
+  .text-primary {
+    color: hsl(32, 85%, 55%);
+  }
+  
+  .text-muted-foreground {
+    color: hsl(42, 30%, 70%);
+  }
+  
+  .bg-primary {
+    background-color: hsl(32, 85%, 55%);
+    color: hsl(95, 30%, 12%);
+  }
+  
+  .bg-muted {
+    background-color: hsl(95, 25%, 20%);
+  }
+  
+  .border-border {
+    border-color: hsl(95, 20%, 25%);
+  }
+  
+  .input {
+    background-color: hsl(95, 30%, 12%);
+    border-color: hsl(95, 20%, 25%);
+    color: hsl(42, 45%, 96%);
+  }
+  
+  .btn-outline {
+    background-color: hsl(95, 30%, 12%);
+    border-color: hsl(95, 20%, 25%);
+  }
+  
+  .toast {
+    background-color: hsl(95, 30%, 12%);
+    border-color: hsl(95, 20%, 25%);
+  }
+  
+  .toast-message {
+    color: hsl(42, 45%, 96%);
   }
 }
 
-@layer components {
-  .card {
-    @apply rounded-lg border bg-card text-card-foreground shadow-sm;
+/* Responsive design */
+@media (max-width: 768px) {
+  .p-8 {
+    padding: 1rem;
   }
-
-  .btn {
-    @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
-    @apply h-10 px-4 py-2;
+  
+  .text-4xl {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
   }
-
-  .btn-primary {
-    @apply bg-primary text-primary-foreground hover:bg-primary/90;
-  }
-
-  .btn-destructive {
-    @apply bg-destructive text-destructive-foreground hover:bg-destructive/90;
-  }
-
-  .btn-outline {
-    @apply border border-input bg-background hover:bg-accent hover:text-accent-foreground;
-  }
-
-  .btn-icon {
-    @apply h-10 w-10;
-  }
-
-  .input {
-    @apply flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
-  }
-
-  .toast {
-    @apply fixed bottom-4 right-4 bg-background border border-border shadow-lg rounded-lg p-4 min-w-[300px] opacity-0 transform translate-x-full transition-all duration-300;
-    z-index: 9999;
-  }
-
-  .toast-show {
-    @apply opacity-100 translate-x-0;
-  }
-
-  .toast-success .toast-content::before {
-    content: '✓';
-    @apply inline-block mr-2 text-accent font-bold;
-  }
-
-  .toast-error .toast-content::before {
-    content: '✕';
-    @apply inline-block mr-2 text-destructive font-bold;
-  }
-
-  .toast-info .toast-content::before {
-    content: 'ℹ';
-    @apply inline-block mr-2 text-primary font-bold;
-  }
-
-  .toast-message {
-    @apply text-foreground font-medium;
-  }
-
-  .toast-description {
-    @apply text-sm text-muted-foreground mt-1;
+  
+  .text-3xl {
+    font-size: 1.5rem;
+    line-height: 2rem;
   }
 }
