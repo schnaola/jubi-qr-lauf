@@ -591,8 +591,8 @@ function render(container) {
   // Append sections in requested order
   contentContainer.appendChild(participantSection);
   contentContainer.appendChild(scannerSection);
-  contentContainer.appendChild(statusSection);
   contentContainer.appendChild(timerSection);
+  contentContainer.appendChild(statusSection);
   contentContainer.appendChild(resultsSection);
   
   mainWrapper.appendChild(contentContainer);
