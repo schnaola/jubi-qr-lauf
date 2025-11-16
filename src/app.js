@@ -1,5 +1,5 @@
-const CHECKPOINTS = ["Start", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Ziel"];
-const ORDERED_CHECKPOINTS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
+const CHECKPOINTS = ["Start", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "Ziel"];
+const ORDERED_CHECKPOINTS = ["30", "31", "32", "33", "34", "35", "36", "37", "38", "39"];
 
 let state = {
   participants: [],
@@ -290,7 +290,7 @@ function render(container) {
   // Main wrapper
   const mainWrapper = document.createElement('div');
   mainWrapper.className = 'min-h-screen bg-cover bg-center bg-fixed relative';
-  mainWrapper.style.backgroundImage = 'url(/src/assets/orienteering-map-bg.jpg)';
+  mainWrapper.style.backgroundImage = 'url(./src/assets/orienteering-map-bg.jpg)';
   
   // Backdrop overlay
   const backdrop = document.createElement('div');
