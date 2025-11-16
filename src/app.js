@@ -493,7 +493,6 @@ function render(container) {
   
   statusColumn.appendChild(buttonRow);
   timerStatusGrid.appendChild(statusColumn);
-  contentContainer.appendChild(timerStatusGrid);
   
   // Scanner and Results Grid
   const scannerResultsGrid = document.createElement('div');
@@ -591,6 +590,7 @@ function render(container) {
   scannerResultsGrid.appendChild(resultsCard);
   
   contentContainer.appendChild(scannerResultsGrid);
+  contentContainer.appendChild(timerStatusGrid);
   mainWrapper.appendChild(contentContainer);
   container.appendChild(mainWrapper);
   
